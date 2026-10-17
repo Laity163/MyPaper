@@ -8,7 +8,6 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 import numpy as np
-import pdb
 
 from plato.utils.torch_utils import dt
 from plato.baseline.pipeline_utils import get_gene_ixs, get_drug_ixs, ParentDecoder, get_gene_embed, get_drug_embed
@@ -78,7 +77,6 @@ class GMLP(nn.Module):
             h = torch.matmul(h, a)
             # dt(h, "h%d"%i)
             v = torch.matmul(a.T, v)
-        # pdb.set_trace()
         return h
 
 class SimpleGMLP(nn.Module):
@@ -126,13 +124,12 @@ class SimpleGMLP(nn.Module):
         h = x
         v = self.V
         if self.edge_index is not None:
-            # pdb.set_trace()
             all_vs = []
             
             # === 修复开始: 增加边数检查 ===
             # 只有当现有边数 > 采样数时才进行采样，否则直接使用全部边
             num_edges = self.edge_index.shape[1]
-            if num_edges > self.num_edges_sampled:
+            if self.training and num_edges > self.num_edges_sampled:
                 idx = np.random.choice(num_edges, self.num_edges_sampled, replace=False)
                 edge_index = self.edge_index[:, idx]
             else:
@@ -170,23 +167,15 @@ class SimpleGMLP(nn.Module):
         else:
             assert(False)
 
-        # h = torch.matmul(h, a)/self.div
-
-        # === 修复开始：处理维度不匹配 (针对 Dummy Drug 情况) ===
-        # 如果输入维度 (例如 200) 不等于权重行数 (例如 1)
         if h.shape[1] != a.shape[0]:
-            # 强制切片输入以匹配权重维度。
-            # 因为您的 Dummy Drug 是全 0 向量，取前几位依然是 0，计算结果正确为 0。
-            h_adjusted = h[:, :a.shape[0]]
-            h = torch.matmul(h_adjusted, a)/self.div
-        else:
-            h = torch.matmul(h, a)/self.div
-        # === 修复结束 ===
-
+            raise ValueError(
+                f"输入特征数与权重行数不一致："
+                f"h.shape={tuple(h.shape)}，a.shape={tuple(a.shape)}"
+            )
+        h = torch.matmul(h, a)/self.div
 
         # dt(h, "h%d"%i)
         # v = torch.matmul(a.T, v)
-        # pdb.set_trace()
         for i in range(1, self.n_layers):
             h = getattr(self, "l%d"%i)(h)
             if i != self.n_layers - 1:

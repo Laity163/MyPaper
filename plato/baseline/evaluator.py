@@ -116,7 +116,7 @@ class MultilabelEval(Eval):
         # metric2score["acc"] = accuracy_score(y_true, y_pred_binary)
         # metric2score["acc"] = (y_true == y_pred_binary).mean()
         h_loss = hamming_loss(y_true, y_pred_binary)
-        metric2score["acc"] = 1 - h_loss
+        metric2score["hamming_accuracy"] = 1 - h_loss
 
         # 使用 average='samples' 计算每个病人的平均表现，zero_division=0 防止报错
         # Micro metrics summarize all patient-disease label decisions together.
@@ -169,13 +169,6 @@ class MultilabelEval(Eval):
             out=np.full_like(fn_per, np.nan, dtype=float),
             where=pos_denom != 0
         )
-
-		# === 新增 Jaccard 计算 ===
-        
-        # (A) 整体 Jaccard (Micro-average)
-        # 将所有预测值和真实值展平后计算 IoU，衡量全局的一致性
-        metric2score["jaccard_samples"] = jaccard_score(y_true, y_pred_binary, average='samples', zero_division=1)
-
 
 
         # # (B) 每种疾病的 Jaccard (Per-class)

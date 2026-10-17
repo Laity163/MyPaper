@@ -3,7 +3,7 @@ class Dataset(object):
         pass
 
     def __getitem__(self, i):
-        return NotImplementedError
+        raise NotImplementedError
 
     def __len__(self):
         return len(self.idx_list)

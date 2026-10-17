@@ -1,0 +1,22 @@
+# Reference environment: Python 3.8.20 (Conda environment: plato).
+# Install PyTorch for your CPU/CUDA target first, followed by matching
+# torch-scatter and torch-sparse wheels. Then install this requirements file.
+# PyG installation guide:
+# https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html
+
+# Model training and graph operations
+torch==2.4.1
+torch-geometric==2.6.1
+torch-scatter==2.1.2
+torch-sparse==0.6.18
+
+# Numerical processing, evaluation, and logging
+numpy==1.24.3
+scipy==1.10.1
+scikit-learn==1.3.2
+tqdm==4.66.5
+tensorboard==2.17.1
+
+# Excel data preprocessing
+pandas==2.0.3
+openpyxl==3.1.5
